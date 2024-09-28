@@ -1,2 +1,8 @@
 django
 djangorestframework
+cryptography
+django-cors-headers
+drf-jwt
+pyjwt
+requests
+django-environ
