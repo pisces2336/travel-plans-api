@@ -14,12 +14,16 @@ import os
 import sys
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 sys.path.insert(0, os.path.join(BASE_DIR, "apps"))
 
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR.parent, ".env"))
+AUTH0_API_IDENTIFIER = env("AUTH0_API_IDENTIFIER")
+AUTH0_DOMAIN = env("AUTH0_DOMAIN")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "auth0authorization",
 ]
 
@@ -133,3 +138,23 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+}
+
+
+JWT_AUTH = {
+    "JWT_PAYLOAD_GET_USERNAME_HANDLER": "auth0authorization.utils.jwt_get_username_from_payload_handler",
+    "JWT_DECODE_HANDLER": "auth0authorization.utils.jwt_decode_token",
+    "JWT_ALGORITHM": "RS256",
+    "JWT_AUDIENCE": AUTH0_API_IDENTIFIER,
+    "JWT_ISSUER": f"https://{AUTH0_DOMAIN}/",
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+}
